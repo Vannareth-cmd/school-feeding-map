@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School Feeding Map</title>
+<meta name="description" content="Schools in Cambodia's School Feeding Programme (WFP and MoEYS), school years 1999-2000 to 2027-2028.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23EDF1EC'/%3E%3Ccircle cx='12' cy='16' r='6' fill='%230A6EB4'/%3E%3Ccircle cx='21' cy='16' r='6' fill='%23C88A00' fill-opacity='.9'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1 data-i18n="title">Schools in the School Feeding Programme, Cambodia</h1>
+    <p class="sub" data-i18n="subtitle">Where WFP and MoEYS have provided school meals, school year by school year</p>
+  </div>
+  <div class="top-actions">
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">English</button>
+      <button type="button" data-lang="km" aria-pressed="false">ខ្មែរ</button>
+    </div>
+    <button type="button" class="btn primary" id="print-open" data-i18n="printMap">Print map</button>
+  </div>
+</header>
+
+<section class="timeline" aria-labelledby="tl-label">
+  <div class="tl-head">
+    <h2 id="tl-label"><span data-i18n="schoolYear">School year</span>: <strong id="tl-current">–</strong></h2>
+    <div class="tl-controls">
+      <button type="button" class="btn" id="tl-play" data-i18n="play">Play</button>
+      <button type="button" class="btn" id="tl-all" aria-pressed="false" data-i18n="allYears">All years</button>
+    </div>
+  </div>
+  <div class="tl-bars" id="tl-bars" role="listbox" aria-labelledby="tl-label"></div>
+  <div class="tl-legend">
+    <span><i class="dot w"></i>WFP</span><span><i class="dot m"></i><span data-i18n="moeys">MoEYS</span></span>
+    <span class="hint" data-i18n="tlHint">Bar height shows the number of schools. Click a year to map it.</span>
+  </div>
+</section>
+
+<main class="stage">
+  <aside class="panel">
+    <div class="field">
+      <span class="label" id="impl-label" data-i18n="implementer">Implementer</span>
+      <div class="seg" role="group" aria-labelledby="impl-label">
+        <button type="button" data-impl="all" aria-pressed="true" data-i18n="all">All</button>
+        <button type="button" data-impl="W" aria-pressed="false">WFP</button>
+        <button type="button" data-impl="M" aria-pressed="false" data-i18n="moeys">MoEYS</button>
+      </div>
+    </div>
+    <label class="field"><span class="label" data-i18n="province">Province</span>
+      <select id="f-prov"></select></label>
+    <label class="field"><span class="label" data-i18n="district">District</span>
+      <select id="f-dist"></select></label>
+    <label class="field"><span class="label" data-i18n="search">Find a school</span>
+      <input id="f-q" type="search" autocomplete="off" data-i18n-ph="searchPh" placeholder="School name or EMIS code"></label>
+    <button type="button" class="link" id="f-reset" data-i18n="reset">Clear filters</button>
+
+    <div class="stats" aria-live="polite">
+      <div class="stat big"><b id="s-total">–</b><span data-i18n="schools">schools</span></div>
+      <div class="stat"><b id="s-w" class="tw">–</b><span>WFP</span></div>
+      <div class="stat"><b id="s-m" class="tm">–</b><span data-i18n="moeys">MoEYS</span></div>
+      <div class="stat"><b id="s-p">–</b><span data-i18n="provincesL">provinces</span></div>
+      <div class="stat"><b id="s-d">–</b><span data-i18n="districtsL">districts</span></div>
+    </div>
+
+    <div class="breakdown">
+      <h3 id="bd-title" data-i18n="byProvince">Schools by province</h3>
+      <ol id="bd-list"></ol>
+    </div>
+  </aside>
+
+  <div class="map-wrap" id="map-wrap">
+    <div class="print-only print-head">
+      <h2 id="p-title">School feeding schools</h2>
+      <p id="p-sub"></p>
+    </div>
+    <div id="map" aria-label="Map of schools"></div>
+    <div class="basemap" role="group" aria-label="Basemap">
+      <button type="button" data-base="map" aria-pressed="true" data-i18n="baseMap">Map</button>
+      <button type="button" data-base="sat" aria-pressed="false" data-i18n="baseSat">Satellite</button>
+    </div>
+    <div class="print-only print-side">
+      <svg class="north" viewBox="0 0 40 56" aria-hidden="true"><path d="M20 4 L32 44 L20 36 L8 44 Z" fill="#1C2B23"/><path d="M20 4 L20 36 L8 44 Z" fill="#fff" stroke="#1C2B23" stroke-width="1.5"/><text x="20" y="55" text-anchor="middle" font-size="12" font-weight="700" fill="#1C2B23">N</text></svg>
+      <div class="p-legend">
+        <h4 data-i18n="legend">Legend</h4>
+        <p><i class="dot w"></i><span data-i18n="implWFP">Implemented by WFP</span> <b id="p-w"></b></p>
+        <p><i class="dot m"></i><span data-i18n="implMoEYS">Implemented by MoEYS</span> <b id="p-m"></b></p>
+        <p><i class="box"></i><span data-i18n="provBoundary">Province boundary</span></p>
+      </div>
+      <svg id="p-inset" class="inset" viewBox="0 0 200 170" aria-hidden="true"></svg>
+      <p class="p-note" id="p-note"></p>
+    </div>
+    <div class="print-only print-foot">
+      <span id="p-source"></span><span id="p-date"></span>
+    </div>
+  </div>
+</main>
+
+<section class="list" aria-labelledby="list-title">
+  <div class="list-head">
+    <h2 id="list-title"><span data-i18n="schoolList">School list</span> <span class="count" id="list-count"></span></h2>
+    <button type="button" class="btn" id="csv" data-i18n="downloadCsv">Download CSV</button>
+  </div>
+  <div class="table-scroll">
+    <table id="tbl">
+      <thead><tr>
+        <th data-k="name_en" data-i18n="colSchool">School</th>
+        <th data-k="name_kh" data-i18n="colKhmer">Khmer name</th>
+        <th data-k="emis" data-i18n="colEmis">EMIS code</th>
+        <th data-k="commune" data-i18n="commune">Commune</th>
+        <th data-k="district" data-i18n="district">District</th>
+        <th data-k="province" data-i18n="province">Province</th>
+        <th data-k="status" data-i18n="implementer">Implementer</th>
+        <th data-k="years" data-i18n="colYears">Years in programme</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="empty" id="empty" hidden data-i18n="empty">No schools match these filters. Clear a filter to see more.</p>
+  <button type="button" class="btn more" id="more" hidden data-i18n="showMore">Show 50 more</button>
+</section>
+
+<footer class="foot">
+  <p><span data-i18n="sourceLine">Data: WFP Cambodia VAM school feeding school list, 1999-2000 to 2027-2028.</span>
+  <span data-i18n="approxLine">Schools marked ≈ have an approximate location (average of their commune).</span>
+  <span data-i18n="boundLine">Province boundaries: geoBoundaries (CC BY 4.0).</span></p>
+</footer>
+
+<dialog id="print-dlg" aria-labelledby="pd-title">
+  <form method="dialog" id="print-form">
+    <h2 id="pd-title" data-i18n="printMap">Print map</h2>
+    <p class="muted" data-i18n="printHelp">The map prints as it is now: same filters, same area. Zoom or pan first if you want a different area.</p>
+    <label class="field"><span class="label" data-i18n="mapTitle">Map title</span>
+      <input id="pd-t" type="text" maxlength="120"></label>
+    <div class="row2">
+      <label class="field"><span class="label" data-i18n="paper">Paper size</span>
+        <select id="pd-paper"><option value="A4">A4</option><option value="A3">A3</option></select></label>
+      <label class="field"><span class="label" data-i18n="orientation">Orientation</span>
+        <select id="pd-orient"><option value="landscape" data-i18n="landscape">Landscape</option><option value="portrait" data-i18n="portrait">Portrait</option></select></label>
+    </div>
+    <p class="muted small" data-i18n="printTip">In the print window, choose "Save as PDF" to keep a file. Turn on "Background graphics" if the colours look faded.</p>
+    <div class="dlg-actions">
+      <button type="button" class="btn" id="pd-cancel" data-i18n="cancel">Cancel</button>
+      <button type="submit" class="btn primary" id="pd-go" data-i18n="print">Print</button>
+    </div>
+  </form>
+</dialog>
+
+<style id="page-size"></style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
