@@ -50,5 +50,5 @@ The web address remembers the filters. For example, `.../#y=2015-2016&prov=Siemr
 - 5 duplicate rows (same school in the same year) were removed.
 - 19 schools had a broken longitude. They are shown at the average position of their commune and marked ≈.
 - EMIS codes are shown with 11 digits; the leading zero lost in Excel was restored (e.g. 01090602013).
-- Province boundaries: [geoBoundaries](https://www.geoboundaries.org) (CC BY 4.0). Basemaps: © OpenStreetMap contributors, © CARTO; satellite imagery © Esri.
+- Province boundaries: [geoBoundaries](https://www.geoboundaries.org) (CC BY 4.0). Basemaps: Esri World Light Gray Canvas, © OpenStreetMap contributors; satellite imagery © Esri. No API keys are needed.
 - The list has no donor column yet.

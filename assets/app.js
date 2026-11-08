@@ -7,7 +7,7 @@
 
   const S = { year: -1, impl: "all", prov: "", dist: "", q: "", lang: "en", base: "map", sortK: "province", sortDir: 1, shown: 50 };
   let D, SCHOOLS = [], YEARS = [], PROVS = null, provKh = {};
-  let map, layerSchools, layerProv, baseLayers, markers = new Map(), playTimer = null, lastFitKey = "";
+  let baseLoad, map, layerSchools, layerProv, baseLayers, markers = new Map(), playTimer = null, lastFitKey = "";
 
   // ---------- i18n ----------
   const t = (k, ...a) => {
@@ -39,7 +39,7 @@
     if (h.get("dist")) S.dist = h.get("dist");
     if (h.get("q")) S.q = h.get("q");
     if (h.get("lang") === "km") S.lang = "km";
-    if (h.get("base") === "sat") S.base = "sat";
+    if (["sat", "streets"].includes(h.get("base"))) S.base = h.get("base");
   }
   function writeHash() {
     const h = new URLSearchParams();
@@ -194,13 +194,18 @@
   function initMap() {
     map = L.map("map", { zoomControl: true, preferCanvas: false, minZoom: 6, maxZoom: 18, zoomSnap: 0.25 })
       .fitBounds([[10.35, 102.3], [14.7, 107.65]]);
-    baseLayers = {
-      map: L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        subdomains: "abcd", maxZoom: 19, crossOrigin: true,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' }),
-      sat: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 19, crossOrigin: true, attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics" })
-    };
+    const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/";
+    const grayBase = L.tileLayer(esri + "Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      maxNativeZoom: 16, maxZoom: 19, crossOrigin: true, attribution: "Basemap &copy; Esri, HERE, Garmin, &copy; OpenStreetMap contributors" });
+    const grayRef = L.tileLayer(esri + "Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+      maxNativeZoom: 16, maxZoom: 19, crossOrigin: true, pane: "labels" });
+    map.createPane("labels"); map.getPane("labels").style.zIndex = 420; map.getPane("labels").style.pointerEvents = "none";
+    const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19, crossOrigin: true, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
+    const sat = L.tileLayer(esri + "World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19, crossOrigin: true, attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics" });
+    baseLayers = { map: L.layerGroup([grayBase, grayRef]), streets: osm, sat: L.layerGroup([sat]) };
+    baseLoad = { map: grayBase, streets: osm, sat: sat };
     baseLayers[S.base].addTo(map);
     L.control.scale({ metric: true, imperial: false, position: "bottomleft", maxWidth: 160 }).addTo(map);
     map.createPane("prov"); map.getPane("prov").style.zIndex = 350;
@@ -369,7 +374,7 @@
     drawInset();
     let done = false;
     const go = () => { if (done) return; done = true; setTimeout(() => window.print(), 250); };
-    baseLayers[S.base].once("load", go);
+    baseLoad[S.base].once("load", go);
     setTimeout(go, 2500);
     const restore = () => {
       window.removeEventListener("afterprint", restore);
