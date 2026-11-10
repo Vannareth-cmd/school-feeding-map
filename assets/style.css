@@ -201,7 +201,7 @@ body.print-prep.portrait .print-foot { grid-row: 4; }
 @media (max-width: 640px) {
   :root { --gap: 12px; }
   .top { padding: 16px 16px 12px; }
-  .top h1 { font-size: 21px; }
+  .top h1 { font-size: 21px; white-space: normal; }
   .timeline, .list { margin: 0 16px; }
   .stage { padding: 12px 16px; }
   .foot { padding: 16px; }
