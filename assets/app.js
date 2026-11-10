@@ -437,7 +437,7 @@
   }
 
   // ---------- load ----------
-  Promise.all([fetch("data/schools.json").then(r => r.json()), fetch("data/provinces.geojson").then(r => r.json())])
+  Promise.all([fetch("data/schools.json?v=202611101144").then(r => r.json()), fetch("data/provinces.geojson").then(r => r.json())])
     .then(([d, p]) => {
       D = d; YEARS = d.years; PROVS = p;
       p.features.forEach(f => { provKh[f.properties.name] = f.properties.name_kh; });
