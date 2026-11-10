@@ -5,7 +5,7 @@
   const COLOR = { W: "#0A6EB4", M: "#C88A00" };
   const KHNUM = "០១២៣៤៥៦៧៨៩";
 
-  const S = { year: -1, impl: "all", prov: "", dist: "", q: "", lang: "en", base: "map", sortK: "province", sortDir: 1, shown: 50 };
+  const S = { year: -1, impl: "all", prov: "", dist: "", q: "", lang: "en", base: "streets", sortK: "province", sortDir: 1, shown: 50 };
   let D, SCHOOLS = [], YEARS = [], PROVS = null, provKh = {};
   let baseLoad, map, layerSchools, layerProv, baseLayers, markers = new Map(), playTimer = null, lastFitKey = "";
 
@@ -39,7 +39,7 @@
     if (h.get("dist")) S.dist = h.get("dist");
     if (h.get("q")) S.q = h.get("q");
     if (h.get("lang") === "km") S.lang = "km";
-    if (["sat", "streets"].includes(h.get("base"))) S.base = h.get("base");
+    if (["sat", "streets", "map"].includes(h.get("base"))) S.base = h.get("base");
   }
   function writeHash() {
     const h = new URLSearchParams();
@@ -49,7 +49,7 @@
     if (S.dist) h.set("dist", S.dist);
     if (S.q) h.set("q", S.q);
     if (S.lang !== "en") h.set("lang", S.lang);
-    if (S.base !== "map") h.set("base", S.base);
+    if (S.base !== "streets") h.set("base", S.base);
     history.replaceState(null, "", "#" + h.toString());
   }
 
