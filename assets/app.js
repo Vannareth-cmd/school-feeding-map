@@ -84,15 +84,15 @@
     YEARS.forEach((y, i) => {
       const b = document.createElement("button");
       b.type = "button"; b.className = "yr"; b.setAttribute("role", "option"); b.dataset.i = i;
-      b.innerHTML = `<span class="n"></span><span class="stack"><span class="w"></span><span class="m"></span></span><span class="y">${y.slice(2, 4)}-${y.slice(7, 9)}</span>`;
+      b.innerHTML = `<span class="n"></span><span class="stack"><span class="w"></span><span class="m"></span></span><span class="y">${y.slice(0, 4)}-${y.slice(7, 9)}</span>`;
       b.addEventListener("click", () => { stopPlay(); setYear(i); });
       wrap.appendChild(b);
     });
     wrap.addEventListener("keydown", e => {
-      if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
       e.preventDefault(); stopPlay();
       const base = S.year < 0 ? YEARS.length - 1 : S.year;
-      setYear(Math.min(YEARS.length - 1, Math.max(0, base + (e.key === "ArrowRight" ? 1 : -1))));
+      setYear(Math.min(YEARS.length - 1, Math.max(0, base + (["ArrowRight", "ArrowDown"].includes(e.key) ? 1 : -1))));
       wrap.children[S.year].focus();
     });
   }
@@ -105,20 +105,19 @@
       return [w, m];
     });
     const max = Math.max(1, ...counts.map(c => c[0] + c[1]));
-    const H = $("#tl-bars").clientHeight - 36;
     $$("#tl-bars .yr").forEach((b, i) => {
       const [w, m] = counts[i];
-      b.querySelector(".w").style.height = (w / max * H) + "px";
-      b.querySelector(".m").style.height = (m / max * H) + "px";
+      b.querySelector(".w").style.width = (w / max * 100) + "%";
+      b.querySelector(".m").style.width = (m / max * 100) + "%";
       b.querySelector(".n").textContent = (w + m) ? num(w + m) : "";
       b.setAttribute("aria-selected", String(i === S.year));
       b.setAttribute("aria-label", `${YEARS[i]}: ${num(w + m)} ${t("schools")} (WFP ${num(w)}, ${t("moeys")} ${num(m)})`);
       b.tabIndex = (i === (S.year < 0 ? YEARS.length - 1 : S.year)) ? 0 : -1;
     });
     const wrap = $("#tl-bars"), selBar = wrap.children[S.year < 0 ? YEARS.length - 1 : S.year];
-    if (selBar && wrap.scrollWidth > wrap.clientWidth) {
-      const l = selBar.offsetLeft - wrap.offsetLeft;
-      if (l < wrap.scrollLeft || l + selBar.offsetWidth > wrap.scrollLeft + wrap.clientWidth) wrap.scrollLeft = l - wrap.clientWidth / 2;
+    if (selBar && wrap.scrollHeight > wrap.clientHeight) {
+      const top = selBar.offsetTop - wrap.offsetTop;
+      if (top < wrap.scrollTop || top + selBar.offsetHeight > wrap.scrollTop + wrap.clientHeight) wrap.scrollTop = top - wrap.clientHeight / 2;
     }
     $(".timeline").classList.toggle("all-years", S.year < 0);
     $("#tl-current").textContent = S.year < 0 ? t("allYears") : YEARS[S.year];
@@ -434,7 +433,7 @@
     $("#print-open").addEventListener("click", openPrint);
     $("#pd-cancel").addEventListener("click", () => $("#print-dlg").close());
     $("#print-form").addEventListener("submit", () => { setTimeout(doPrint, 50); });
-    window.addEventListener("resize", () => renderTimeline());
+    window.addEventListener("resize", () => map.invalidateSize());
   }
 
   // ---------- load ----------
