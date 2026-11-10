@@ -1,7 +1,7 @@
 // Interface text in English and Khmer. Edit the Khmer side freely; any missing key falls back to English.
 window.I18N = {
   en: {
-    title: "Schools in the School Feeding Programme, Cambodia",
+    title: "Journey of School Feeding Programme in Cambodia from 1999-2028",
     subtitle: "Where WFP and MoEYS have provided school meals, school year by school year",
     printMap: "Print map", schoolYear: "School year", play: "Play", pause: "Pause", allYears: "All years",
     moeys: "MoEYS", tlHint: "Bar height shows the number of schools. Click a year to map it.",
