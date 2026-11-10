@@ -29,7 +29,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
   display: flex; align-items: flex-end; justify-content: space-between; gap: var(--gap);
   padding: 20px 24px 14px; flex-wrap: wrap;
 }
-.top h1 { font-size: 26px; line-height: 1.2; letter-spacing: -0.01em; max-width: 22em; }
+.top h1 { font-size: 26px; line-height: 1.2; letter-spacing: -0.01em; white-space: nowrap; }
 .top .sub { margin: 4px 0 0; color: var(--muted); max-width: 46em; }
 .top-actions { display: flex; gap: 10px; align-items: center; }
 
